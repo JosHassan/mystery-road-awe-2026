@@ -190,7 +190,7 @@ actual debugger or a VS Code extension for debugging — ideally on one of the b
       difference.
 - [ ] While paused at a breakpoint, open the Call Stack panel and explain, for a real example, "who
       called this function, and with what."
-- [ ] Use a **conditional breakpoint** or a **logpoint** at least once (e.g. only break when a loop
+- [] Use a **conditional breakpoint** or a **logpoint** at least once (e.g. only break when a loop
       variable equals a specific value, or a specific ID is being processed).
 - [ ] While paused, use the Scope/Watch panel (or hover over variables) to track a value across
       several steps of execution, and edit a variable's value live to test a hypothesis before

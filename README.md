@@ -2,6 +2,12 @@
 
 Investigate the failure of an AI-assisted rehabilitation robot.
 
+## Exercise 1 solution
+
+The application has been refactored into native ES modules under `js/`. Start it with VS Code Live Server or another local HTTP server.
+
+- [`CHANGES.md`](CHANGES.md) summarises the code changes and their reasons.
+
 ## About
 
 Project ReMotion is a browser-based investigation platform built around a fictional incident.
