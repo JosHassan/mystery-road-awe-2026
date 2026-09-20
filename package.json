@@ -1,0 +1,11 @@
+{
+  "name": "mystery-road-awe-2026",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Investigation portal for the Project ReMotion case study.",
+  "type": "module",
+  "scripts": {},
+  "devDependencies": {
+    "vite": "^8.3.0"
+  }
+}
