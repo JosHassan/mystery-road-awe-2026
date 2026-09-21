@@ -4,7 +4,9 @@
   "private": true,
   "description": "Investigation portal for the Project ReMotion case study.",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "dev": "vite"
+  },
   "devDependencies": {
     "vite": "^8.3.0"
   }
