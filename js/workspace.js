@@ -2,16 +2,25 @@ import { state } from "./state.js";
 import { escapeHtml } from "./utils.js";
 import { navigateTo } from "./router.js";
 import { openEvidenceDetail } from "./evidence.js";
-import { loadHypothesisFromStorage, saveHypothesisToStorage } from "./storage.js";
+import {
+  loadHypothesisFromStorage,
+  saveHypothesisToStorage,
+} from "./storage.js";
 
 const renderBookmarksList = () => {
   const container = document.getElementById("bookmarksList");
   if (!container) return;
   const items = state.allEvidence.filter((evidence) => evidence.bookmarked);
-  container.innerHTML = items.length ? items.map((evidence) => `
+  container.innerHTML = items.length
+    ? items
+        .map(
+          (evidence) => `
     <div class="mini-list-item"><strong>${escapeHtml(evidence.id)}</strong> &mdash; ${escapeHtml(evidence.title)}
       <button type="button" class="btn btn-small btn-secondary" data-open-evidence="${escapeHtml(evidence.id)}">Open</button>
-    </div>`).join("") : "<p>No bookmarked evidence yet. Bookmark items from the Evidence view.</p>";
+    </div>`,
+        )
+        .join("")
+    : "<p>No bookmarked evidence yet. Bookmark items from the Evidence view.</p>";
 
   if (!container.dataset.listenerAttached) {
     container.addEventListener("click", (event) => {
@@ -31,10 +40,16 @@ const renderNotesList = () => {
   const entries = state.allEvidence
     .map((evidence) => ({ evidence, note: state.notesStore[evidence.id] }))
     .filter(({ note }) => note);
-  container.innerHTML = entries.length ? entries.map(({ evidence, note }) => `
+  container.innerHTML = entries.length
+    ? entries
+        .map(
+          ({ evidence, note }) => `
     <div class="mini-list-item"><strong>${escapeHtml(evidence.id)}</strong> &mdash; ${escapeHtml(evidence.title)}
       <div>${escapeHtml(note)}</div>
-    </div>`).join("") : "<p>No notes yet. Add one from an evidence item's detail view.</p>";
+    </div>`,
+        )
+        .join("")
+    : "<p>No notes yet. Add one from an evidence item's detail view.</p>";
 };
 
 export const populateHypothesisDropdowns = () => {
@@ -42,13 +57,24 @@ export const populateHypothesisDropdowns = () => {
   const evidenceSelect = document.getElementById("hypEvidence");
   if (!suspectSelect || !evidenceSelect) return;
   const currentSuspect = suspectSelect.value;
-  const selectedEvidenceIds = [...evidenceSelect.selectedOptions].map((option) => option.value);
-  suspectSelect.innerHTML = '<option value="">Select a person…</option>'
-    + state.allPeople.map((person) => `<option value="${escapeHtml(person.id)}">${escapeHtml(person.name)}</option>`).join("");
+  const selectedEvidenceIds = [...evidenceSelect.selectedOptions].map(
+    (option) => option.value,
+  );
+  suspectSelect.innerHTML =
+    '<option value="">Select a person…</option>' +
+    state.allPeople
+      .map(
+        (person) =>
+          `<option value="${escapeHtml(person.id)}">${escapeHtml(person.name)}</option>`,
+      )
+      .join("");
   suspectSelect.value = currentSuspect;
-  evidenceSelect.innerHTML = state.allEvidence.map((evidence) =>
-    `<option value="${escapeHtml(evidence.id)}">${escapeHtml(evidence.id)} - ${escapeHtml(evidence.title)}</option>`,
-  ).join("");
+  evidenceSelect.innerHTML = state.allEvidence
+    .map(
+      (evidence) =>
+        `<option value="${escapeHtml(evidence.id)}">${escapeHtml(evidence.id)} - ${escapeHtml(evidence.title)}</option>`,
+    )
+    .join("");
   [...evidenceSelect.options].forEach((option) => {
     option.selected = selectedEvidenceIds.includes(option.value);
   });
@@ -60,7 +86,8 @@ const restoreHypothesisForm = () => {
   document.getElementById("hypSuspect").value = draft.suspectId || "";
   document.getElementById("hypNature").value = draft.nature || "";
   document.getElementById("hypConfidence").value = draft.confidence ?? 50;
-  document.getElementById("hypConfidenceValue").textContent = draft.confidence ?? 50;
+  document.getElementById("hypConfidenceValue").textContent =
+    draft.confidence ?? 50;
   document.getElementById("hypExplanation").value = draft.explanation || "";
   document.getElementById("hypAlternative").value = draft.alternative || "";
   const savedIds = draft.evidenceIds || [];
@@ -73,7 +100,9 @@ export const saveHypothesis = () => {
   const draft = {
     suspectId: document.getElementById("hypSuspect").value,
     nature: document.getElementById("hypNature").value,
-    evidenceIds: [...document.getElementById("hypEvidence").selectedOptions].map((option) => option.value),
+    evidenceIds: [
+      ...document.getElementById("hypEvidence").selectedOptions,
+    ].map((option) => option.value),
     confidence: document.getElementById("hypConfidence").value,
     explanation: document.getElementById("hypExplanation").value,
     alternative: document.getElementById("hypAlternative").value,

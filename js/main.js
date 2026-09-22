@@ -1,5 +1,10 @@
 import { state } from "./state.js";
-import { fetchCoreData, fetchEvidenceData, fetchTimelineData, loadNoteAsync } from "./data.js";
+import {
+  fetchCoreData,
+  fetchEvidenceData,
+  fetchTimelineData,
+  loadNoteAsync,
+} from "./data.js";
 import { loadBookmarksFromStorage, loadNotesFromStorage } from "./storage.js";
 import { createHashChangeHandler, navigateTo } from "./router.js";
 import { renderDashboard } from "./dashboard.js";
@@ -12,7 +17,11 @@ import {
 } from "./evidence.js";
 import { renderPeopleAndLocations, switchPeopleTab } from "./people.js";
 import { populateTimelineDropdowns, renderTimeline } from "./timeline.js";
-import { populateHypothesisDropdowns, renderWorkspace, saveHypothesis } from "./workspace.js";
+import {
+  populateHypothesisDropdowns,
+  renderWorkspace,
+  saveHypothesis,
+} from "./workspace.js";
 
 const showLoadingOverlay = (message) => {
   document.getElementById("loadingText").textContent = message;
@@ -102,23 +111,52 @@ const setupEventListeners = () => {
 
   document.querySelectorAll(".nav-btn, [data-navigate]").forEach((button) => {
     button.addEventListener("click", (event) => {
-      const viewName = event.currentTarget.dataset.view || event.currentTarget.dataset.navigate;
+      const viewName =
+        event.currentTarget.dataset.view ||
+        event.currentTarget.dataset.navigate;
       navigateTo(viewName);
     });
   });
 
-  document.getElementById("tabPeopleBtn").addEventListener("click", () => switchPeopleTab("people"));
-  document.getElementById("tabLocationsBtn").addEventListener("click", () => switchPeopleTab("locations"));
-  document.getElementById("evidenceSearch").addEventListener("input", handleSearchInput);
-  ["filterType", "filterPerson", "filterLocation", "filterStatus", "filterRelevance", "sortEvidence"]
-    .forEach((id) => document.getElementById(id).addEventListener("change", renderEvidenceList));
-  document.getElementById("clearFiltersBtn").addEventListener("click", clearFilters);
-  ["timelineOrder", "timelinePersonFilter", "timelineLocationFilter", "timelineTypeFilter"]
-    .forEach((id) => document.getElementById(id).addEventListener("change", renderTimeline));
-  document.getElementById("hypConfidence").addEventListener("input", (event) => {
-    document.getElementById("hypConfidenceValue").textContent = event.target.value;
-  });
-  document.getElementById("saveHypothesisBtn").addEventListener("click", saveHypothesis);
+  document
+    .getElementById("tabPeopleBtn")
+    .addEventListener("click", () => switchPeopleTab("people"));
+  document
+    .getElementById("tabLocationsBtn")
+    .addEventListener("click", () => switchPeopleTab("locations"));
+  document
+    .getElementById("evidenceSearch")
+    .addEventListener("input", handleSearchInput);
+  [
+    "filterType",
+    "filterPerson",
+    "filterLocation",
+    "filterStatus",
+    "filterRelevance",
+    "sortEvidence",
+  ].forEach((id) =>
+    document.getElementById(id).addEventListener("change", renderEvidenceList),
+  );
+  document
+    .getElementById("clearFiltersBtn")
+    .addEventListener("click", clearFilters);
+  [
+    "timelineOrder",
+    "timelinePersonFilter",
+    "timelineLocationFilter",
+    "timelineTypeFilter",
+  ].forEach((id) =>
+    document.getElementById(id).addEventListener("change", renderTimeline),
+  );
+  document
+    .getElementById("hypConfidence")
+    .addEventListener("input", (event) => {
+      document.getElementById("hypConfidenceValue").textContent =
+        event.target.value;
+    });
+  document
+    .getElementById("saveHypothesisBtn")
+    .addEventListener("click", saveHypothesis);
 };
 
 const initApp = async () => {

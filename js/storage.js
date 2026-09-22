@@ -25,7 +25,10 @@ export const saveBookmarksToStorage = () => {
 
 export const loadNotesFromStorage = () => {
   const parsed = readJson(STORAGE_KEYS.notes, {});
-  state.notesStore = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  state.notesStore =
+    parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? parsed
+      : {};
 };
 
 export const saveNoteForEvidence = (evidenceId, text) => {
@@ -33,7 +36,8 @@ export const saveNoteForEvidence = (evidenceId, text) => {
   writeJson(STORAGE_KEYS.notes, state.notesStore);
 };
 
-export const loadNoteForEvidence = (evidenceId) => state.notesStore[evidenceId] || "";
+export const loadNoteForEvidence = (evidenceId) =>
+  state.notesStore[evidenceId] || "";
 
 export const saveHypothesisToStorage = (draft) => {
   writeJson(STORAGE_KEYS.hypothesis, draft);
@@ -41,5 +45,7 @@ export const saveHypothesisToStorage = (draft) => {
 
 export const loadHypothesisFromStorage = () => {
   const parsed = readJson(STORAGE_KEYS.hypothesis, null);
-  return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+  return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+    ? parsed
+    : null;
 };

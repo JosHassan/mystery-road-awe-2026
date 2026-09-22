@@ -15,13 +15,30 @@ export const populateTimelineDropdowns = () => {
   const typeSelect = document.getElementById("timelineTypeFilter");
   if (!personSelect || !locationSelect || !typeSelect) return;
 
-  personSelect.innerHTML = '<option value="">All people</option>'
-    + state.allPeople.map((person) => `<option value="${escapeHtml(person.id)}">${escapeHtml(person.name)}</option>`).join("");
-  locationSelect.innerHTML = '<option value="">All locations</option>'
-    + state.allLocations.map((location) => `<option value="${escapeHtml(location.id)}">${escapeHtml(location.id)}</option>`).join("");
-  typeSelect.innerHTML = '<option value="">All event types</option>'
-    + [...new Set(state.allTimeline.map((event) => event.type))]
-      .map((type) => `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`).join("");
+  personSelect.innerHTML =
+    '<option value="">All people</option>' +
+    state.allPeople
+      .map(
+        (person) =>
+          `<option value="${escapeHtml(person.id)}">${escapeHtml(person.name)}</option>`,
+      )
+      .join("");
+  locationSelect.innerHTML =
+    '<option value="">All locations</option>' +
+    state.allLocations
+      .map(
+        (location) =>
+          `<option value="${escapeHtml(location.id)}">${escapeHtml(location.id)}</option>`,
+      )
+      .join("");
+  typeSelect.innerHTML =
+    '<option value="">All event types</option>' +
+    [...new Set(state.allTimeline.map((event) => event.type))]
+      .map(
+        (type) =>
+          `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`,
+      )
+      .join("");
 };
 
 const getVisibleEvents = () => {
@@ -31,9 +48,12 @@ const getVisibleEvents = () => {
   const descending = document.getElementById("timelineOrder").value === "desc";
 
   return state.allTimeline
-    .filter((event) => (!personId || event.personIds.includes(personId))
-      && (!locationId || event.locationIds.includes(locationId))
-      && (!type || event.type === type))
+    .filter(
+      (event) =>
+        (!personId || event.personIds.includes(personId)) &&
+        (!locationId || event.locationIds.includes(locationId)) &&
+        (!type || event.type === type),
+    )
     .slice()
     .sort((a, b) => {
       const difference = new Date(a.time) - new Date(b.time);
@@ -45,12 +65,14 @@ export const renderTimeline = () => {
   const container = document.getElementById("timelineContainer");
   if (!container) return;
   const events = getVisibleEvents();
-  container.innerHTML = events.length ? events.map((event) => {
-    const locations = event.locationIds.map((id) => {
-      const location = findLocationById(id);
-      return location ? `${location.id} - ${location.name}` : id;
-    });
-    return `
+  container.innerHTML = events.length
+    ? events
+        .map((event) => {
+          const locations = event.locationIds.map((id) => {
+            const location = findLocationById(id);
+            return location ? `${location.id} - ${location.name}` : id;
+          });
+          return `
       <div class="timeline-event certainty-${escapeHtml(event.certainty)}">
         <div class="timeline-time">${formatDate(event.time)}&nbsp;&middot;&nbsp;<span class="badge badge-${certaintyBadgeClass(event.certainty)}">${escapeHtml(event.certainty)}</span></div>
         <h3>${escapeHtml(event.title)}</h3>
@@ -58,7 +80,9 @@ export const renderTimeline = () => {
         ${locations.length ? `<p class="evidence-meta">Location: ${locations.map(escapeHtml).join(", ")}</p>` : ""}
         ${event.evidenceIds.map((id) => `<button type="button" class="evidence-link-btn" data-evidence-id="${escapeHtml(id)}">View ${escapeHtml(id)}</button>`).join("")}
       </div>`;
-  }).join("") : "<p>No timeline events match the current filters.</p>";
+        })
+        .join("")
+    : "<p>No timeline events match the current filters.</p>";
 
   if (!container.dataset.listenerAttached) {
     container.addEventListener("click", (event) => {
@@ -76,7 +100,8 @@ const getOrCreateModal = () => {
     modal.id = "quickViewModal";
     document.body.appendChild(modal);
     modal.addEventListener("click", (event) => {
-      if (event.target.matches(".modal-close-btn, .modal-backdrop")) modal.innerHTML = "";
+      if (event.target.matches(".modal-close-btn, .modal-backdrop"))
+        modal.innerHTML = "";
       const openButton = event.target.closest("[data-open-full]");
       if (!openButton) return;
       const evidenceId = openButton.dataset.openFull;

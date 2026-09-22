@@ -1,6 +1,12 @@
 import { state } from "./state.js";
 
-const validViews = new Set(["dashboard", "evidence", "people", "timeline", "workspace"]);
+const validViews = new Set([
+  "dashboard",
+  "evidence",
+  "people",
+  "timeline",
+  "workspace",
+]);
 
 export const navigateTo = (viewName) => {
   window.location.hash = viewName;
@@ -11,7 +17,9 @@ export const createHashChangeHandler = (renderers) => () => {
   const viewName = validViews.has(requestedView) ? requestedView : "dashboard";
   state.currentPage = viewName;
 
-  document.querySelectorAll(".view").forEach((section) => section.classList.remove("active"));
+  document
+    .querySelectorAll(".view")
+    .forEach((section) => section.classList.remove("active"));
   document.getElementById(`view-${viewName}`).classList.add("active");
 
   document.querySelectorAll(".nav-btn").forEach((button) => {

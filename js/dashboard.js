@@ -42,16 +42,32 @@ export const renderDashboard = () => {
     <div class="dashboard-columns">
       <div class="dashboard-panel">
         <h3>Recent evidence</h3>
-        ${recentEvidence.length ? recentEvidence.map((evidence) => `
+        ${
+          recentEvidence.length
+            ? recentEvidence
+                .map(
+                  (evidence) => `
           <div class="mini-list-item">
             <strong>${escapeHtml(evidence.id)}</strong> &mdash; ${escapeHtml(evidence.title)}
             <span class="badge ${getStatusBadgeClass(evidence.status)}">${escapeHtml(evidence.status)}</span>
-          </div>`).join("") : "<p>No evidence loaded yet.</p>"}
+          </div>`,
+                )
+                .join("")
+            : "<p>No evidence loaded yet.</p>"
+        }
       </div>
       <div class="dashboard-panel">
         <h3>Recent timeline events</h3>
-        ${recentTimeline.length ? recentTimeline.map((event) => `
-          <div class="mini-list-item"><strong>${formatDate(event.time)}</strong><br>${escapeHtml(event.title)}</div>`).join("") : "<p>No timeline events loaded yet.</p>"}
+        ${
+          recentTimeline.length
+            ? recentTimeline
+                .map(
+                  (event) => `
+          <div class="mini-list-item"><strong>${formatDate(event.time)}</strong><br>${escapeHtml(event.title)}</div>`,
+                )
+                .join("")
+            : "<p>No timeline events loaded yet.</p>"
+        }
       </div>
     </div>`;
 };

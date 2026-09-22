@@ -6,20 +6,31 @@ import { renderEvidenceList } from "./evidence.js";
 export const switchPeopleTab = (tab) => {
   state.currentPeopleTab = tab;
   const showPeople = tab === "people";
-  document.getElementById("peoplePanel").classList.toggle("hidden", !showPeople);
-  document.getElementById("locationsPanel").classList.toggle("hidden", showPeople);
-  document.getElementById("tabPeopleBtn").classList.toggle("active", showPeople);
-  document.getElementById("tabLocationsBtn").classList.toggle("active", !showPeople);
+  document
+    .getElementById("peoplePanel")
+    .classList.toggle("hidden", !showPeople);
+  document
+    .getElementById("locationsPanel")
+    .classList.toggle("hidden", showPeople);
+  document
+    .getElementById("tabPeopleBtn")
+    .classList.toggle("active", showPeople);
+  document
+    .getElementById("tabLocationsBtn")
+    .classList.toggle("active", !showPeople);
 };
 
 const countEvidenceForPerson = (person) =>
-  state.allEvidence.filter((evidence) => evidenceMentionsPerson(evidence, person)).length;
+  state.allEvidence.filter((evidence) =>
+    evidenceMentionsPerson(evidence, person),
+  ).length;
 
 export const renderPeople = () => {
   const container = document.getElementById("peoplePanel");
-  container.innerHTML = state.allPeople.map((person) => {
-    const count = countEvidenceForPerson(person);
-    return `
+  container.innerHTML = state.allPeople
+    .map((person) => {
+      const count = countEvidenceForPerson(person);
+      return `
       <div class="person-card">
         <div class="person-card-header">
           <img class="person-avatar" src="${escapeHtml(person.avatar)}" alt="Portrait of ${escapeHtml(person.name)}">
@@ -32,7 +43,8 @@ export const renderPeople = () => {
           <button type="button" class="evidence-count-link" data-person-id="${escapeHtml(person.id)}">view</button>
         </p>
       </div>`;
-  }).join("");
+    })
+    .join("");
 
   if (!container.dataset.listenerAttached) {
     container.addEventListener("click", (event) => {
@@ -47,13 +59,17 @@ export const renderPeople = () => {
 };
 
 export const renderLocations = () => {
-  document.getElementById("locationsPanel").innerHTML = state.allLocations.map((location) => `
+  document.getElementById("locationsPanel").innerHTML = state.allLocations
+    .map(
+      (location) => `
     <div class="location-card">
       <h3>${escapeHtml(location.id)} &mdash; ${escapeHtml(location.name)}</h3>
       <p>${escapeHtml(location.description)}</p>
       <p><strong>Contains:</strong></p>
       <ul>${location.contains.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-    </div>`).join("");
+    </div>`,
+    )
+    .join("");
 };
 
 export const renderPeopleAndLocations = () => {

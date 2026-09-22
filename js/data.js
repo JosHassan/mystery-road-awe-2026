@@ -1,6 +1,8 @@
 const parseJsonResponse = async (response) => {
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Request failed: ${response.status} ${response.statusText}`,
+    );
   }
   return response.json();
 };

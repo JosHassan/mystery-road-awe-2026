@@ -10,8 +10,9 @@ export const findLocationById = (id) =>
   state.allLocations.find((location) => location.id === id) ?? null;
 
 export const evidenceMentionsPerson = (evidence, person) =>
-  Array.isArray(evidence.personIds)
-  && (evidence.personIds.includes(person.id) || evidence.personIds.includes(person.name));
+  Array.isArray(evidence.personIds) &&
+  (evidence.personIds.includes(person.id) ||
+    evidence.personIds.includes(person.name));
 
 export const formatDate = (timestamp) => {
   if (!timestamp) return "Unknown date";
@@ -32,15 +33,22 @@ export const getStatusBadgeClass = (status) => {
 };
 
 export const getRelevanceBadgeClass = (relevance) =>
-  (relevance || "").toLowerCase() === "relevant" ? "badge-relevant" : "badge-unreviewed";
+  (relevance || "").toLowerCase() === "relevant"
+    ? "badge-relevant"
+    : "badge-unreviewed";
 
-export const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  "'": "&#39;",
-  '"': "&quot;",
-})[character]);
+export const escapeHtml = (value = "") =>
+  String(value).replace(
+    /[&<>'"]/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        '"': "&quot;",
+      })[character],
+  );
 
 export const certaintyBadgeClass = (certainty) => {
   if (certainty === "confirmed") return "reviewed";
