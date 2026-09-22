@@ -5,8 +5,8 @@ import {
   findEvidenceById,
   findLocationById,
   formatDate,
-} from "./utils.js";
-import { navigateTo } from "./router.js";
+} from "./utils.ts";
+import { navigateTo } from "./router.ts";
 import { openEvidenceDetail } from "./evidence.js";
 
 export const populateTimelineDropdowns = () => {

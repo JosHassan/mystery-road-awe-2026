@@ -8,7 +8,7 @@ import {
   formatDate,
   getRelevanceBadgeClass,
   getStatusBadgeClass,
-} from "./utils.js";
+} from "./utils.ts";
 import {
   loadNoteForEvidence,
   saveBookmarksToStorage,

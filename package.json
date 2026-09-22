@@ -5,18 +5,22 @@
   "description": "Investigation portal for the Project ReMotion case study.",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "concurrently -k \"tsc --noEmit --watch\" \"vite\"",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "lint": "eslint js",
     "lint:fix": "eslint js --fix",
-    "format": "prettier --write \"js/**/*.{js,ts}\" package.json eslint.config.js"
+    "format": "prettier --write \"js/**/*.{js,ts}\" package.json eslint.config.js tsconfig.json"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "concurrently": "^10.0.5",
     "eslint": "^10.11.0",
     "globals": "^17.12.0",
     "prettier": "^3.9.8",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.1",
     "vite": "^8.3.0"
   }
 }

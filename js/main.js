@@ -6,7 +6,7 @@ import {
   loadNoteAsync,
 } from "./data.js";
 import { loadBookmarksFromStorage, loadNotesFromStorage } from "./storage.js";
-import { createHashChangeHandler, navigateTo } from "./router.js";
+import { createHashChangeHandler, navigateTo } from "./router.ts";
 import { renderDashboard } from "./dashboard.js";
 import {
   applyStoredBookmarkFlags,

@@ -1,6 +1,6 @@
 import { state } from "./state.js";
-import { escapeHtml, evidenceMentionsPerson } from "./utils.js";
-import { navigateTo } from "./router.js";
+import { escapeHtml, evidenceMentionsPerson } from "./utils.ts";
+import { navigateTo } from "./router.ts";
 import { renderEvidenceList } from "./evidence.js";
 
 export const switchPeopleTab = (tab) => {

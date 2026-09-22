@@ -1,5 +1,5 @@
 import { state } from "./state.js";
-import { escapeHtml, formatDate, getStatusBadgeClass } from "./utils.js";
+import { escapeHtml, formatDate, getStatusBadgeClass } from "./utils.ts";
 
 const statCardHtml = (value, label) => `
   <div class="stat-card">
