@@ -64,7 +64,7 @@ export const escapeHtml = (value: unknown = "") =>
   );
 
 export const certaintyBadgeClass = (certainty: string | null | undefined) => {
-  if (certainty==="confirmed") return "reviewed";
+  if (certainty === "confirmed") return "reviewed";
   if (certainty === "contradictory") return "critical";
   if (certainty === "reported") return "flagged";
   return "unreviewed";
