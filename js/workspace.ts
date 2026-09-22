@@ -1,11 +1,12 @@
-import { state } from "./state.js";
-import { escapeHtml } from "./utils.ts";
+import { state } from "./state.ts";
+import { escapeHtml, requireElement } from "./utils.ts";
+import type { HypothesisDraft } from "./types.ts";
 import { navigateTo } from "./router.ts";
-import { openEvidenceDetail } from "./evidence.js";
+import { openEvidenceDetail } from "./evidence.ts";
 import {
   loadHypothesisFromStorage,
   saveHypothesisToStorage,
-} from "./storage.js";
+} from "./storage.ts";
 
 const renderBookmarksList = () => {
   const container = document.getElementById("bookmarksList");
@@ -24,9 +25,11 @@ const renderBookmarksList = () => {
 
   if (!container.dataset.listenerAttached) {
     container.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-open-evidence]");
+      if (!(event.target instanceof Element)) return;
+      const button = event.target.closest<HTMLElement>("[data-open-evidence]");
       if (!button) return;
       const evidenceId = button.dataset.openEvidence;
+      if (!evidenceId) return;
       navigateTo("evidence");
       setTimeout(() => openEvidenceDetail(evidenceId), 0);
     });
@@ -55,7 +58,11 @@ const renderNotesList = () => {
 export const populateHypothesisDropdowns = () => {
   const suspectSelect = document.getElementById("hypSuspect");
   const evidenceSelect = document.getElementById("hypEvidence");
-  if (!suspectSelect || !evidenceSelect) return;
+  if (
+    !(suspectSelect instanceof HTMLSelectElement) ||
+    !(evidenceSelect instanceof HTMLSelectElement)
+  )
+    return;
   const currentSuspect = suspectSelect.value;
   const selectedEvidenceIds = [...evidenceSelect.selectedOptions].map(
     (option) => option.value,
@@ -83,29 +90,34 @@ export const populateHypothesisDropdowns = () => {
 const restoreHypothesisForm = () => {
   const draft = loadHypothesisFromStorage();
   if (!draft) return;
-  document.getElementById("hypSuspect").value = draft.suspectId || "";
-  document.getElementById("hypNature").value = draft.nature || "";
-  document.getElementById("hypConfidence").value = draft.confidence ?? 50;
-  document.getElementById("hypConfidenceValue").textContent =
-    draft.confidence ?? 50;
-  document.getElementById("hypExplanation").value = draft.explanation || "";
-  document.getElementById("hypAlternative").value = draft.alternative || "";
-  const savedIds = draft.evidenceIds || [];
-  [...document.getElementById("hypEvidence").options].forEach((option) => {
-    option.selected = savedIds.includes(option.value);
+  requireElement("hypSuspect", HTMLSelectElement).value = draft.suspectId;
+  requireElement("hypNature", HTMLSelectElement).value = draft.nature;
+  requireElement("hypConfidence", HTMLInputElement).value = String(
+    draft.confidence,
+  );
+  requireElement("hypConfidenceValue", HTMLOutputElement).textContent = String(
+    draft.confidence,
+  );
+  requireElement("hypExplanation", HTMLTextAreaElement).value =
+    draft.explanation;
+  requireElement("hypAlternative", HTMLTextAreaElement).value =
+    draft.alternative;
+  const evidenceSelect = requireElement("hypEvidence", HTMLSelectElement);
+  [...evidenceSelect.options].forEach((option) => {
+    option.selected = draft.evidenceIds.includes(option.value);
   });
 };
 
 export const saveHypothesis = () => {
-  const draft = {
-    suspectId: document.getElementById("hypSuspect").value,
-    nature: document.getElementById("hypNature").value,
+  const draft: HypothesisDraft = {
+    suspectId: requireElement("hypSuspect", HTMLSelectElement).value,
+    nature: requireElement("hypNature", HTMLSelectElement).value,
     evidenceIds: [
-      ...document.getElementById("hypEvidence").selectedOptions,
+      ...requireElement("hypEvidence", HTMLSelectElement).selectedOptions,
     ].map((option) => option.value),
-    confidence: document.getElementById("hypConfidence").value,
-    explanation: document.getElementById("hypExplanation").value,
-    alternative: document.getElementById("hypAlternative").value,
+    confidence: requireElement("hypConfidence", HTMLInputElement).value,
+    explanation: requireElement("hypExplanation", HTMLTextAreaElement).value,
+    alternative: requireElement("hypAlternative", HTMLTextAreaElement).value,
     savedAt: new Date().toISOString(),
   };
   try {
@@ -115,7 +127,7 @@ export const saveHypothesis = () => {
     alert("Your hypothesis could not be saved to local storage.");
     return;
   }
-  const message = document.getElementById("hypothesisSavedMsg");
+  const message = requireElement("hypothesisSavedMsg", HTMLElement);
   message.classList.remove("hidden");
   setTimeout(() => message.classList.add("hidden"), 2000);
 };

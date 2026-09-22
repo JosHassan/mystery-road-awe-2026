@@ -1,13 +1,14 @@
-import { state } from "./state.js";
+import { state } from "./state.ts";
 import {
   certaintyBadgeClass,
   escapeHtml,
   findEvidenceById,
   findLocationById,
   formatDate,
+  requireElement,
 } from "./utils.ts";
 import { navigateTo } from "./router.ts";
-import { openEvidenceDetail } from "./evidence.js";
+import { openEvidenceDetail } from "./evidence.ts";
 
 export const populateTimelineDropdowns = () => {
   const personSelect = document.getElementById("timelinePersonFilter");
@@ -42,21 +43,29 @@ export const populateTimelineDropdowns = () => {
 };
 
 const getVisibleEvents = () => {
-  const personId = document.getElementById("timelinePersonFilter").value;
-  const locationId = document.getElementById("timelineLocationFilter").value;
-  const type = document.getElementById("timelineTypeFilter").value;
-  const descending = document.getElementById("timelineOrder").value === "desc";
+  const personId = requireElement(
+    "timelinePersonFilter",
+    HTMLSelectElement,
+  ).value;
+  const locationId = requireElement(
+    "timelineLocationFilter",
+    HTMLSelectElement,
+  ).value;
+  const type = requireElement("timelineTypeFilter", HTMLSelectElement).value;
+  const descending =
+    requireElement("timelineOrder", HTMLSelectElement).value === "desc";
 
   return state.allTimeline
     .filter(
       (event) =>
-        (!personId || event.personIds.includes(personId)) &&
+        (!personId || event.personIds.some((id) => id === personId)) &&
         (!locationId || event.locationIds.includes(locationId)) &&
         (!type || event.type === type),
     )
     .slice()
     .sort((a, b) => {
-      const difference = new Date(a.time) - new Date(b.time);
+      const difference =
+        new Date(a.time).getTime() - new Date(b.time).getTime();
       return descending ? -difference : difference;
     });
 };
@@ -86,8 +95,11 @@ export const renderTimeline = () => {
 
   if (!container.dataset.listenerAttached) {
     container.addEventListener("click", (event) => {
-      const button = event.target.closest(".evidence-link-btn");
-      if (button) openEvidenceModal(button.dataset.evidenceId);
+      if (!(event.target instanceof Element)) return;
+      const button =
+        event.target.closest<HTMLButtonElement>(".evidence-link-btn");
+      if (button?.dataset.evidenceId)
+        openEvidenceModal(button.dataset.evidenceId);
     });
     container.dataset.listenerAttached = "true";
   }
@@ -96,24 +108,27 @@ export const renderTimeline = () => {
 const getOrCreateModal = () => {
   let modal = document.getElementById("quickViewModal");
   if (!modal) {
-    modal = document.createElement("div");
-    modal.id = "quickViewModal";
-    document.body.appendChild(modal);
-    modal.addEventListener("click", (event) => {
+    const createdModal = document.createElement("div");
+    createdModal.id = "quickViewModal";
+    document.body.appendChild(createdModal);
+    createdModal.addEventListener("click", (event) => {
+      if (!(event.target instanceof Element)) return;
       if (event.target.matches(".modal-close-btn, .modal-backdrop"))
-        modal.innerHTML = "";
-      const openButton = event.target.closest("[data-open-full]");
+        createdModal.innerHTML = "";
+      const openButton = event.target.closest<HTMLElement>("[data-open-full]");
       if (!openButton) return;
       const evidenceId = openButton.dataset.openFull;
-      modal.innerHTML = "";
+      if (!evidenceId) return;
+      createdModal.innerHTML = "";
       navigateTo("evidence");
       setTimeout(() => openEvidenceDetail(evidenceId), 0);
     });
+    modal = createdModal;
   }
   return modal;
 };
 
-export const openEvidenceModal = (evidenceId) => {
+export const openEvidenceModal = (evidenceId: string) => {
   const evidence = findEvidenceById(evidenceId);
   if (!evidence) return;
   const modal = getOrCreateModal();

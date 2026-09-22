@@ -1,27 +1,31 @@
-import { state } from "./state.js";
+import { state } from "./state.ts";
+import type { Evidence, Location, Person } from "./types.ts";
 
-export const findEvidenceById = (id: string) => {
-  const evidenceItems: { id: string }[] = state.allEvidence;
-  return evidenceItems.find((evidence) => evidence.id === id) ?? null;
-};
+export const findEvidenceById = (id: string): Evidence | null =>
+  state.allEvidence.find((evidence) => evidence.id === id) ?? null;
 
-export const findPersonById = (id: string) => {
-  const people: { id: string }[] = state.allPeople;
-  return people.find((person) => person.id === id) ?? null;
-};
+export const findPersonById = (id: string): Person | null =>
+  state.allPeople.find((person) => person.id === id) ?? null;
 
-export const findLocationById = (id: string) => {
-  const locations: { id: string }[] = state.allLocations;
-  return locations.find((location) => location.id === id) ?? null;
-};
+export const findLocationById = (id: string): Location | null =>
+  state.allLocations.find((location) => location.id === id) ?? null;
 
 export const evidenceMentionsPerson = (
-  evidence: { personIds?: string[] },
-  person: { id: string; name: string },
-) =>
-  Array.isArray(evidence.personIds) &&
-  (evidence.personIds.includes(person.id) ||
-    evidence.personIds.includes(person.name));
+  evidence: Evidence,
+  person: Person,
+): boolean =>
+  evidence.personIds.some((id) => id === person.id || id === person.name);
+
+export const requireElement = <T extends HTMLElement>(
+  id: string,
+  expected: { new (): T },
+): T => {
+  const element = document.getElementById(id);
+  if (!(element instanceof expected)) {
+    throw new Error(`Missing or invalid element: ${id}`);
+  }
+  return element;
+};
 
 export const formatDate = (timestamp: string | null | undefined) => {
   if (!timestamp) return "Unknown date";

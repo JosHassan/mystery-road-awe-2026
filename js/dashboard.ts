@@ -1,7 +1,7 @@
-import { state } from "./state.js";
+import { state } from "./state.ts";
 import { escapeHtml, formatDate, getStatusBadgeClass } from "./utils.ts";
 
-const statCardHtml = (value, label) => `
+const statCardHtml = (value: number, label: string) => `
   <div class="stat-card">
     <div class="stat-value">${value}</div>
     <div class="stat-label">${label}</div>

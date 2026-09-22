@@ -1,37 +1,38 @@
-import { state } from "./state.js";
+import { state } from "./state.ts";
 import {
   fetchCoreData,
   fetchEvidenceData,
   fetchTimelineData,
   loadNoteAsync,
 } from "./data.ts";
-import { loadBookmarksFromStorage, loadNotesFromStorage } from "./storage.js";
+import { loadBookmarksFromStorage, loadNotesFromStorage } from "./storage.ts";
 import { createHashChangeHandler, navigateTo } from "./router.ts";
-import { renderDashboard } from "./dashboard.js";
+import { renderDashboard } from "./dashboard.ts";
 import {
   applyStoredBookmarkFlags,
   clearFilters,
   handleSearchInput,
   populateEvidenceDropdowns,
   renderEvidenceList,
-} from "./evidence.js";
-import { renderPeopleAndLocations, switchPeopleTab } from "./people.js";
-import { populateTimelineDropdowns, renderTimeline } from "./timeline.js";
+} from "./evidence.ts";
+import { renderPeopleAndLocations, switchPeopleTab } from "./people.ts";
+import { populateTimelineDropdowns, renderTimeline } from "./timeline.ts";
 import {
   populateHypothesisDropdowns,
   renderWorkspace,
   saveHypothesis,
-} from "./workspace.js";
+} from "./workspace.ts";
+import { requireElement } from "./utils.ts";
 
-const showLoadingOverlay = (message) => {
-  document.getElementById("loadingText").textContent = message;
-  document.getElementById("loadingOverlay").classList.remove("hidden");
+const showLoadingOverlay = (message: string) => {
+  requireElement("loadingText", HTMLElement).textContent = message;
+  requireElement("loadingOverlay", HTMLElement).classList.remove("hidden");
 };
 
 const hideLoadingStep = () => {
   state.loadingStepsRemaining -= 1;
   if (state.loadingStepsRemaining <= 0) {
-    document.getElementById("loadingOverlay").classList.add("hidden");
+    requireElement("loadingOverlay", HTMLElement).classList.add("hidden");
   }
 };
 
@@ -109,24 +110,28 @@ const handleHashChange = createHashChangeHandler({
 const setupEventListeners = () => {
   window.addEventListener("hashchange", handleHashChange);
 
-  document.querySelectorAll(".nav-btn, [data-navigate]").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      const viewName =
-        event.currentTarget.dataset.view ||
-        event.currentTarget.dataset.navigate;
-      navigateTo(viewName);
+  document
+    .querySelectorAll<HTMLElement>(".nav-btn, [data-navigate]")
+    .forEach((button) => {
+      button.addEventListener("click", (event) => {
+        if (!(event.currentTarget instanceof HTMLElement)) return;
+        const viewName =
+          event.currentTarget.dataset.view ||
+          event.currentTarget.dataset.navigate;
+        if (viewName) navigateTo(viewName);
+      });
     });
-  });
 
-  document
-    .getElementById("tabPeopleBtn")
-    .addEventListener("click", () => switchPeopleTab("people"));
-  document
-    .getElementById("tabLocationsBtn")
-    .addEventListener("click", () => switchPeopleTab("locations"));
-  document
-    .getElementById("evidenceSearch")
-    .addEventListener("input", handleSearchInput);
+  requireElement("tabPeopleBtn", HTMLElement).addEventListener("click", () =>
+    switchPeopleTab("people"),
+  );
+  requireElement("tabLocationsBtn", HTMLElement).addEventListener("click", () =>
+    switchPeopleTab("locations"),
+  );
+  requireElement("evidenceSearch", HTMLInputElement).addEventListener(
+    "input",
+    handleSearchInput,
+  );
   [
     "filterType",
     "filterPerson",
@@ -135,28 +140,35 @@ const setupEventListeners = () => {
     "filterRelevance",
     "sortEvidence",
   ].forEach((id) =>
-    document.getElementById(id).addEventListener("change", renderEvidenceList),
+    requireElement(id, HTMLSelectElement).addEventListener(
+      "change",
+      renderEvidenceList,
+    ),
   );
-  document
-    .getElementById("clearFiltersBtn")
-    .addEventListener("click", clearFilters);
+  requireElement("clearFiltersBtn", HTMLElement).addEventListener(
+    "click",
+    clearFilters,
+  );
   [
     "timelineOrder",
     "timelinePersonFilter",
     "timelineLocationFilter",
     "timelineTypeFilter",
   ].forEach((id) =>
-    document.getElementById(id).addEventListener("change", renderTimeline),
+    requireElement(id, HTMLSelectElement).addEventListener(
+      "change",
+      renderTimeline,
+    ),
   );
-  document
-    .getElementById("hypConfidence")
-    .addEventListener("input", (event) => {
-      document.getElementById("hypConfidenceValue").textContent =
-        event.target.value;
-    });
-  document
-    .getElementById("saveHypothesisBtn")
-    .addEventListener("click", saveHypothesis);
+  const confidenceInput = requireElement("hypConfidence", HTMLInputElement);
+  confidenceInput.addEventListener("input", () => {
+    requireElement("hypConfidenceValue", HTMLOutputElement).textContent =
+      confidenceInput.value;
+  });
+  requireElement("saveHypothesisBtn", HTMLElement).addEventListener(
+    "click",
+    saveHypothesis,
+  );
 };
 
 const initApp = async () => {

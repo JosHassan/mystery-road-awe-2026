@@ -1,32 +1,37 @@
-import { state } from "./state.js";
-import { escapeHtml, evidenceMentionsPerson } from "./utils.ts";
+import { state } from "./state.ts";
+import { escapeHtml, evidenceMentionsPerson, requireElement } from "./utils.ts";
+import type { Person } from "./types.ts";
 import { navigateTo } from "./router.ts";
-import { renderEvidenceList } from "./evidence.js";
+import { renderEvidenceList } from "./evidence.ts";
 
-export const switchPeopleTab = (tab) => {
+export const switchPeopleTab = (tab: "people" | "locations") => {
   state.currentPeopleTab = tab;
   const showPeople = tab === "people";
-  document
-    .getElementById("peoplePanel")
-    .classList.toggle("hidden", !showPeople);
-  document
-    .getElementById("locationsPanel")
-    .classList.toggle("hidden", showPeople);
-  document
-    .getElementById("tabPeopleBtn")
-    .classList.toggle("active", showPeople);
-  document
-    .getElementById("tabLocationsBtn")
-    .classList.toggle("active", !showPeople);
+  requireElement("peoplePanel", HTMLElement).classList.toggle(
+    "hidden",
+    !showPeople,
+  );
+  requireElement("locationsPanel", HTMLElement).classList.toggle(
+    "hidden",
+    showPeople,
+  );
+  requireElement("tabPeopleBtn", HTMLElement).classList.toggle(
+    "active",
+    showPeople,
+  );
+  requireElement("tabLocationsBtn", HTMLElement).classList.toggle(
+    "active",
+    !showPeople,
+  );
 };
 
-const countEvidenceForPerson = (person) =>
+const countEvidenceForPerson = (person: Person) =>
   state.allEvidence.filter((evidence) =>
     evidenceMentionsPerson(evidence, person),
   ).length;
 
 export const renderPeople = () => {
-  const container = document.getElementById("peoplePanel");
+  const container = requireElement("peoplePanel", HTMLElement);
   container.innerHTML = state.allPeople
     .map((person) => {
       const count = countEvidenceForPerson(person);
@@ -48,9 +53,13 @@ export const renderPeople = () => {
 
   if (!container.dataset.listenerAttached) {
     container.addEventListener("click", (event) => {
-      const link = event.target.closest(".evidence-count-link");
+      if (!(event.target instanceof Element)) return;
+      const link = event.target.closest<HTMLButtonElement>(
+        ".evidence-count-link",
+      );
       if (!link) return;
-      document.getElementById("filterPerson").value = link.dataset.personId;
+      requireElement("filterPerson", HTMLSelectElement).value =
+        link.dataset.personId ?? "";
       navigateTo("evidence");
       setTimeout(renderEvidenceList, 0);
     });
@@ -59,7 +68,7 @@ export const renderPeople = () => {
 };
 
 export const renderLocations = () => {
-  document.getElementById("locationsPanel").innerHTML = state.allLocations
+  requireElement("locationsPanel", HTMLElement).innerHTML = state.allLocations
     .map(
       (location) => `
     <div class="location-card">

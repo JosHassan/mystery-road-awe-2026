@@ -1,4 +1,5 @@
-import { state } from "./state.js";
+import { state } from "./state.ts";
+import type { Evidence } from "./types.ts";
 import {
   escapeHtml,
   evidenceMentionsPerson,
@@ -8,12 +9,13 @@ import {
   formatDate,
   getRelevanceBadgeClass,
   getStatusBadgeClass,
+  requireElement,
 } from "./utils.ts";
 import {
   loadNoteForEvidence,
   saveBookmarksToStorage,
   saveNoteForEvidence,
-} from "./storage.js";
+} from "./storage.ts";
 
 export const applyStoredBookmarkFlags = () => {
   state.allEvidence.forEach((evidence) => {
@@ -25,7 +27,12 @@ export const populateEvidenceDropdowns = () => {
   const typeSelect = document.getElementById("filterType");
   const personSelect = document.getElementById("filterPerson");
   const locationSelect = document.getElementById("filterLocation");
-  if (!typeSelect || !personSelect || !locationSelect) return;
+  if (
+    !(typeSelect instanceof HTMLSelectElement) ||
+    !(personSelect instanceof HTMLSelectElement) ||
+    !(locationSelect instanceof HTMLSelectElement)
+  )
+    return;
 
   const types = [
     ...new Set(state.allEvidence.map((item) => item.type.toLowerCase())),
@@ -57,13 +64,16 @@ export const populateEvidenceDropdowns = () => {
 };
 
 const getFilteredEvidence = () => {
+  const searchInput = document.getElementById("evidenceSearch");
   const searchTerm =
-    document.getElementById("evidenceSearch")?.value.toLowerCase().trim() ?? "";
-  const type = document.getElementById("filterType").value;
-  const personId = document.getElementById("filterPerson").value;
-  const locationId = document.getElementById("filterLocation").value;
-  const status = document.getElementById("filterStatus").value;
-  const relevance = document.getElementById("filterRelevance").value;
+    searchInput instanceof HTMLInputElement
+      ? searchInput.value.toLowerCase().trim()
+      : "";
+  const type = requireElement("filterType", HTMLSelectElement).value;
+  const personId = requireElement("filterPerson", HTMLSelectElement).value;
+  const locationId = requireElement("filterLocation", HTMLSelectElement).value;
+  const status = requireElement("filterStatus", HTMLSelectElement).value;
+  const relevance = requireElement("filterRelevance", HTMLSelectElement).value;
   const person = personId ? findPersonById(personId) : null;
 
   return state.allEvidence.filter((item) => {
@@ -72,7 +82,8 @@ const getFilteredEvidence = () => {
     return (
       (!searchTerm || haystack.includes(searchTerm)) &&
       (!type || item.type.toLowerCase() === type) &&
-      (!personId || (person && evidenceMentionsPerson(item, person))) &&
+      (!personId ||
+        (person !== null && evidenceMentionsPerson(item, person))) &&
       (!locationId || item.locationIds.includes(locationId)) &&
       (!status || (item.status || "").toLowerCase() === status) &&
       (!relevance || (item.relevance || "").toLowerCase() === relevance)
@@ -80,18 +91,19 @@ const getFilteredEvidence = () => {
   });
 };
 
-const sortEvidence = (items) => {
-  const sortValue = document.getElementById("sortEvidence").value;
+const sortEvidence = (items: Evidence[]): Evidence[] => {
+  const sortValue = requireElement("sortEvidence", HTMLSelectElement).value;
   // Task 2: always sort a copy. Sorting the original array caused the reference bug.
   return [...items].sort((a, b) => {
     if (sortValue === "title-asc") return a.title.localeCompare(b.title);
     if (sortValue === "title-desc") return b.title.localeCompare(a.title);
-    const dateDifference = new Date(a.timestamp) - new Date(b.timestamp);
+    const dateDifference =
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     return sortValue === "date-asc" ? dateDifference : -dateDifference;
   });
 };
 
-const renderEvidenceCardHtml = (evidence) => {
+const renderEvidenceCardHtml = (evidence: Evidence) => {
   const isBookmarked = state.bookmarks.includes(evidence.id);
   return `
     <div class="evidence-card" data-id="${escapeHtml(evidence.id)}">
@@ -108,7 +120,7 @@ const renderEvidenceCardHtml = (evidence) => {
     </div>`;
 };
 
-const handleBookmarkClick = (evidenceId) => {
+const handleBookmarkClick = (evidenceId: string) => {
   const evidence = findEvidenceById(evidenceId);
   if (!evidence) return;
 
@@ -123,15 +135,19 @@ const handleBookmarkClick = (evidenceId) => {
   renderEvidenceList();
 };
 
-const handleEvidenceListClick = (event) => {
-  const bookmarkButton = event.target.closest('[data-action="bookmark"]');
+const handleEvidenceListClick = (event: MouseEvent) => {
+  if (!(event.target instanceof Element)) return;
+  const bookmarkButton = event.target.closest<HTMLElement>(
+    '[data-action="bookmark"]',
+  );
   if (bookmarkButton) {
     event.stopPropagation();
-    handleBookmarkClick(bookmarkButton.dataset.id);
+    if (bookmarkButton.dataset.id)
+      handleBookmarkClick(bookmarkButton.dataset.id);
     return;
   }
-  const card = event.target.closest(".evidence-card");
-  if (card) openEvidenceDetail(card.dataset.id);
+  const card = event.target.closest<HTMLElement>(".evidence-card");
+  if (card?.dataset.id) openEvidenceDetail(card.dataset.id);
 };
 
 export const renderEvidenceList = () => {
@@ -165,27 +181,33 @@ export const clearFilters = () => {
     "filterStatus",
     "filterRelevance",
   ].forEach((id) => {
-    document.getElementById(id).value = "";
+    const control = document.getElementById(id);
+    if (
+      control instanceof HTMLInputElement ||
+      control instanceof HTMLSelectElement
+    )
+      control.value = "";
   });
   renderEvidenceList();
 };
 
-const simulateAsyncSearch = (term) =>
+const simulateAsyncSearch = (term: string): Promise<string> =>
   new Promise((resolve) => {
     setTimeout(() => resolve(term), 300);
   });
 
-export const handleSearchInput = async (event) => {
+export const handleSearchInput = async (event: Event) => {
+  if (!(event.target instanceof HTMLInputElement)) return;
   const requestId = ++state.latestSearchRequestId;
   await simulateAsyncSearch(event.target.value);
   if (requestId === state.latestSearchRequestId) renderEvidenceList();
 };
 
-const statusOptionHtml = (current, value, label) =>
+const statusOptionHtml = (current: string, value: string, label: string) =>
   `<option value="${value}"${(current || "").toLowerCase() === value ? " selected" : ""}>${label}</option>`;
 
 export const closeEvidenceDetail = () => {
-  const section = document.getElementById("evidenceDetailSection");
+  const section = requireElement("evidenceDetailSection", HTMLElement);
   section.classList.add("hidden");
   section.innerHTML = "";
   state.selectedEvidence = null;
@@ -193,14 +215,18 @@ export const closeEvidenceDetail = () => {
 
 const saveCurrentNote = () => {
   const textarea = document.getElementById("evidenceNoteInput");
-  if (!textarea) return;
+  if (
+    !(textarea instanceof HTMLTextAreaElement) ||
+    !textarea.dataset.evidenceId
+  )
+    return;
   saveNoteForEvidence(textarea.dataset.evidenceId, textarea.value);
   const preview = document.getElementById("notePreview");
   if (preview) preview.textContent = textarea.value;
 };
 
-export const renderEvidenceDetail = (evidence) => {
-  const section = document.getElementById("evidenceDetailSection");
+export const renderEvidenceDetail = (evidence: Evidence) => {
+  const section = requireElement("evidenceDetailSection", HTMLElement);
   const people = evidence.personIds.map((id) => findPersonById(id)?.name ?? id);
   const locations = evidence.locationIds.map((id) => {
     const location = findLocationById(id);
@@ -235,33 +261,41 @@ export const renderEvidenceDetail = (evidence) => {
     </div>
     <div class="detail-field"><strong>Note preview</strong><div id="notePreview">${escapeHtml(storedNote)}</div></div>`;
 
-  section
-    .querySelector('[data-action="close-detail"]')
-    .addEventListener("click", closeEvidenceDetail);
-  section
-    .querySelector('[data-action="save-note"]')
-    .addEventListener("click", saveCurrentNote);
-  section
-    .querySelector("#detailStatusSelect")
-    .addEventListener("change", (event) => {
-      evidence.status = event.target.value;
-      renderEvidenceDetail(evidence);
-      renderEvidenceList();
-    });
-  section
-    .querySelector("#detailRelevanceSelect")
-    .addEventListener("change", (event) => {
-      evidence.relevance = event.target.value;
-      renderEvidenceDetail(evidence);
-      renderEvidenceList();
-    });
+  const closeButton = section.querySelector<HTMLButtonElement>(
+    '[data-action="close-detail"]',
+  );
+  const saveButton = section.querySelector<HTMLButtonElement>(
+    '[data-action="save-note"]',
+  );
+  const statusSelect = section.querySelector<HTMLSelectElement>(
+    "#detailStatusSelect",
+  );
+  const relevanceSelect = section.querySelector<HTMLSelectElement>(
+    "#detailRelevanceSelect",
+  );
+  if (!closeButton || !saveButton || !statusSelect || !relevanceSelect) {
+    throw new Error("Evidence detail controls are missing");
+  }
+
+  closeButton.addEventListener("click", closeEvidenceDetail);
+  saveButton.addEventListener("click", saveCurrentNote);
+  statusSelect.addEventListener("change", () => {
+    evidence.status = statusSelect.value;
+    renderEvidenceDetail(evidence);
+    renderEvidenceList();
+  });
+  relevanceSelect.addEventListener("change", () => {
+    evidence.relevance = relevanceSelect.value;
+    renderEvidenceDetail(evidence);
+    renderEvidenceList();
+  });
 };
 
-export const openEvidenceDetail = (evidenceId) => {
+export const openEvidenceDetail = (evidenceId: string) => {
   const evidence = findEvidenceById(evidenceId);
   if (!evidence) return;
   state.selectedEvidence = evidence;
-  const section = document.getElementById("evidenceDetailSection");
+  const section = requireElement("evidenceDetailSection", HTMLElement);
   section.classList.remove("hidden");
   renderEvidenceDetail(evidence);
   section.scrollIntoView({ behavior: "smooth", block: "start" });

@@ -18,6 +18,7 @@ export interface Evidence {
   tags: string[];
   status: string;
   relevance: string;
+  bookmarked?: boolean;
 }
 export interface Person {
   id: PersonId;
@@ -57,4 +58,14 @@ export interface CaseData {
   location: string;
   leadInvestigator: string;
   notes: string;
+}
+
+export interface HypothesisDraft {
+  suspectId: string;
+  nature: string;
+  evidenceIds: string[];
+  confidence: string | number;
+  explanation: string;
+  alternative: string;
+  savedAt: string;
 }
