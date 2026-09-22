@@ -4,7 +4,7 @@ import {
   fetchEvidenceData,
   fetchTimelineData,
   loadNoteAsync,
-} from "./data.js";
+} from "./data.ts";
 import { loadBookmarksFromStorage, loadNotesFromStorage } from "./storage.js";
 import { createHashChangeHandler, navigateTo } from "./router.ts";
 import { renderDashboard } from "./dashboard.js";
