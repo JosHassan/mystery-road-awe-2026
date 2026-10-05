@@ -1,5 +1,25 @@
 import { useEffect, useState } from "react";
+import {
+  fetchCoreData,
+  fetchEvidenceData,
+  fetchTimelineData,
+} from "../js/data.ts";
+import { STORAGE_KEYS } from "../js/state.ts";
+import { DashboardPage, type DashboardData } from "./DashboardPage";
 import { StaticExample } from "./StaticExample";
+
+const readBookmarkCount = (): number => {
+  try {
+    const value: unknown = JSON.parse(
+      localStorage.getItem(STORAGE_KEYS.bookmarks) ?? "[]",
+    );
+    return Array.isArray(value)
+      ? value.filter((id) => typeof id === "string").length
+      : 0;
+  } catch {
+    return 0;
+  }
+};
 
 const views = [
   { id: "dashboard", label: "Dashboard" },
@@ -69,6 +89,9 @@ function StubPage({ view }: { view: Exclude<ViewName, "dashboard"> }) {
 
 export function App() {
   const [view, setView] = useState<ViewName>(currentHashView);
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [bookmarkCount, setBookmarkCount] = useState(readBookmarkCount);
 
   useEffect(() => {
     const onHashChange = () => setView(currentHashView());
@@ -76,15 +99,42 @@ export function App() {
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    Promise.all([fetchCoreData(), fetchEvidenceData(), fetchTimelineData()])
+      .then(([core, evidence, timeline]) => {
+        if (active) setData({ ...core, evidence, timeline });
+      })
+      .catch((error: unknown) => {
+        if (active)
+          setLoadError(
+            error instanceof Error ? error.message : "Unknown loading error",
+          );
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEYS.bookmarks)
+        setBookmarkCount(readBookmarkCount());
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   return (
     <>
       <AppHeader currentView={view} />
       <main className="app-main">
         {view === "dashboard" ? (
-          <section>
-            <h2>Case Dashboard</h2>
-            <p>React Dashboard will appear here next.</p>
-          </section>
+          <DashboardPage
+            data={data}
+            loadError={loadError}
+            bookmarkCount={bookmarkCount}
+          />
         ) : (
           <StubPage view={view} />
         )}
