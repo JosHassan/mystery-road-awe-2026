@@ -9,13 +9,17 @@
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
-    "lint": "eslint js",
-    "lint:fix": "eslint js --fix",
-    "format": "prettier --write \"js/**/*.{js,ts}\" package.json eslint.config.js tsconfig.json",
-    "format:check": "prettier --check \"js/**/*.{js,ts}\" package.json eslint.config.js tsconfig.json"
+    "lint": "eslint js react vite.config.ts",
+    "lint:fix": "eslint js react vite.config.ts --fix",
+    "format": "prettier --write \"js/**/*.{js,ts}\" \"react/**/*.{ts,tsx}\" package.json eslint.config.js tsconfig.json vite.config.ts",
+    "format:check": "prettier --check \"js/**/*.{js,ts}\" \"react/**/*.{ts,tsx}\" package.json eslint.config.js tsconfig.json vite.config.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "concurrently": "^10.0.5",
     "eslint": "^10.11.0",
     "globals": "^17.12.0",
@@ -23,5 +27,9 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.1",
     "vite": "^8.3.0"
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   }
 }

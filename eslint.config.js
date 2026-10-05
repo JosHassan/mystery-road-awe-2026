@@ -8,7 +8,7 @@ export default defineConfig([
     ignores: ["dist/**", "node_modules/**"],
   },
   {
-    files: ["js/**/*.{js,ts}"],
+    files: ["{js,react}/**/*.{js,ts,tsx}", "vite.config.ts"],
     languageOptions: {
       globals: globals.browser,
     },
