@@ -22,24 +22,23 @@ during the course will be to analyse, maintain, refactor, migrate, and extend it
 
 ## Running the application
 
-This application uses `fetch()` to load its case data from local JSON files, so it must be served
-over HTTP — opening `index.html` directly from the filesystem (`file://`) will not work in most
-browsers.
-
-Any static file server will do. For example, from the project root:
+Install the locked dependencies and start the Vite development server:
 
 ```bash
-# Python 3
-python -m http.server 8080
-
-# Node.js (no install required)
-npx serve .
-
-# VS Code
-# Use the "Live Server" extension
+npm ci
+npm run dev
 ```
 
-Then open `http://localhost:8080` (or whatever port your server prints) in your browser.
+On Windows PowerShell, use `npm.cmd ci` and `npm.cmd run dev` if the script execution policy blocks `npm.ps1`.
+Open `http://localhost:5173/` for the original application or
+`http://localhost:5173/react.html` for the React migration. Both use the same JSON data.
+Run `npm run typecheck`, `npm run lint`, and `npm run build` before presenting.
+
+Exercise 4 migrates Dashboard, People & Locations, and Timeline to React. The last two views,
+Evidence and Workspace, are still in the original application until Exercise 5. The React pages
+have shareable hash routes, for example `react.html#/team/locations` and
+`react.html#/timeline?person=nova-byte`. The exercise tasks and presentation notes are in
+[`docs/exercise-4/README.md`](docs/exercise-4/README.md).
 
 ## Features
 
@@ -59,6 +58,5 @@ be enabled. The layout targets common desktop and tablet widths.
 
 ## Project status
 
-This is an existing brownfield application, not a fresh scaffold. It works for everyday use, but
-you should expect to find rough edges, inconsistent patterns, and a handful of bugs as you work
-with it — that discovery process is part of the course.
+This is a brownfield application being migrated one view at a time. The original application
+remains available while the React version is incomplete.

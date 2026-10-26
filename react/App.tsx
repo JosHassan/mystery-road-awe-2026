@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
+import { Navigate, Route, Routes } from "react-router";
 import {
   fetchCoreData,
   fetchEvidenceData,
   fetchTimelineData,
 } from "../js/data.ts";
 import { STORAGE_KEYS } from "../js/state.ts";
-import { DashboardPage, type DashboardData } from "./DashboardPage";
-import { StaticExample } from "./StaticExample";
+import { DashboardPage, type DashboardData } from "./dashboard/DashboardPage";
+import { AppShell } from "./shell/AppShell";
+import { PeopleLocationsPage } from "./people-locations/PeopleLocationsPage";
+import { PersonDetailPage } from "./people-locations/PersonDetailPage";
+import { TimelinePage } from "./timeline/TimelinePage";
+import { KeyIdentityDemo } from "./demos/KeyIdentityDemo";
 
 const readBookmarkCount = (): number => {
   try {
@@ -21,83 +26,28 @@ const readBookmarkCount = (): number => {
   }
 };
 
-const views = [
-  { id: "dashboard", label: "Dashboard" },
-  { id: "evidence", label: "Evidence" },
-  { id: "people", label: "People & Locations" },
-  { id: "timeline", label: "Timeline" },
-  { id: "workspace", label: "Workspace" },
-] as const;
-
-type ViewName = (typeof views)[number]["id"];
-
-const currentHashView = (): ViewName => {
-  const hash = window.location.hash.slice(1);
-  return views.find((view) => view.id === hash)?.id ?? "dashboard";
-};
-
-function AppHeader({ currentView }: { currentView: ViewName }) {
-  return (
-    <header className="app-header">
-      <div className="header-inner">
-        <div className="brand">
-          <img
-            src="/assets/logo/logo.svg"
-            alt="Project ReMotion logo"
-            className="brand-logo"
-          />
-          <div>
-            <h1>Project ReMotion</h1>
-            <StaticExample />
-          </div>
-        </div>
-        <nav className="main-nav" aria-label="Main navigation">
-          {views.map((view) => (
-            <button
-              key={view.id}
-              type="button"
-              className={`nav-btn ${currentView === view.id ? "active" : ""}`}
-              aria-current={currentView === view.id ? "page" : undefined}
-              onClick={() => {
-                window.location.hash = view.id;
-              }}
-            >
-              {view.label}
-            </button>
-          ))}
-        </nav>
-      </div>
-    </header>
-  );
-}
-
-function StubPage({ view }: { view: Exclude<ViewName, "dashboard"> }) {
-  const title = views.find((item) => item.id === view)?.label ?? view;
+function FuturePage({
+  title,
+  originalHash,
+}: {
+  title: string;
+  originalHash: string;
+}) {
   return (
     <section>
       <h2>{title}</h2>
       <p>
-        This page remains in the original app for now. It will move to React in
-        a later exercise.
+        This view is still in the original app. It moves to React in Exercise 5.
       </p>
-      <p>
-        <a href={`/#${view}`}>Open {title} in the original app</a>
-      </p>
+      <a href={`/#${originalHash}`}>Open {title} in the original app</a>
     </section>
   );
 }
 
 export function App() {
-  const [view, setView] = useState<ViewName>(currentHashView);
   const [data, setData] = useState<DashboardData | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [bookmarkCount, setBookmarkCount] = useState(readBookmarkCount);
-
-  useEffect(() => {
-    const onHashChange = () => setView(currentHashView());
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
 
   useEffect(() => {
     let active = true;
@@ -125,29 +75,80 @@ export function App() {
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
+  const loading = loadError ? (
+    <p role="alert">Could not load the case: {loadError}</p>
+  ) : (
+    <p>Loading case data…</p>
+  );
+
   return (
-    <>
-      <AppHeader currentView={view} />
-      <main className="app-main">
-        {view === "dashboard" ? (
-          <DashboardPage
-            data={data}
-            loadError={loadError}
-            bookmarkCount={bookmarkCount}
-          />
-        ) : (
-          <StubPage view={view} />
-        )}
-        <p>
-          <a href="/">Return to the original app</a>
-        </p>
-      </main>
-      <footer className="app-footer">
-        <p>
-          Project ReMotion Investigation Portal — Research Center AI, Software
-          and IT-Security of HCW (fictional case study)
-        </p>
-      </footer>
-    </>
+    <AppShell>
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route
+          path="/dashboard"
+          element={
+            <DashboardPage
+              data={data}
+              loadError={loadError}
+              bookmarkCount={bookmarkCount}
+            />
+          }
+        />
+        <Route path="/team" element={<Navigate to="/team/people" replace />} />
+        <Route
+          path="/team/people"
+          element={
+            data ? (
+              <PeopleLocationsPage
+                kind="people"
+                people={data.people}
+                locations={data.locations}
+              />
+            ) : (
+              loading
+            )
+          }
+        />
+        <Route
+          path="/team/people/:personId"
+          element={data ? <PersonDetailPage people={data.people} /> : loading}
+        />
+        <Route
+          path="/team/locations"
+          element={
+            data ? (
+              <PeopleLocationsPage
+                kind="locations"
+                people={data.people}
+                locations={data.locations}
+              />
+            ) : (
+              loading
+            )
+          }
+        />
+        <Route
+          path="/timeline"
+          element={
+            data ? (
+              <TimelinePage events={data.timeline} people={data.people} />
+            ) : (
+              loading
+            )
+          }
+        />
+        <Route
+          path="/evidence"
+          element={<FuturePage title="Evidence" originalHash="evidence" />}
+        />
+        <Route
+          path="/workspace"
+          element={<FuturePage title="Workspace" originalHash="workspace" />}
+        />
+        <Route path="/key-demo" element={<KeyIdentityDemo />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </AppShell>
   );
 }

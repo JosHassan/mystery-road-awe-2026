@@ -93,6 +93,8 @@ h1, h2, h3, h4 {
 }
 
 .nav-btn {
+  display: inline-block;
+  text-decoration: none;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.25);
   color: #e8ecf5;
@@ -561,6 +563,9 @@ a:focus-visible {
 }
 
 .tab-btn {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--color-text);
   padding: 8px 16px;
   border-radius: var(--radius);
   border: 1px solid var(--color-border);
@@ -572,6 +577,13 @@ a:focus-visible {
   background: var(--color-header-2);
   color: #fff;
   border-color: var(--color-header-2);
+}
+
+.key-demo-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 8px 0;
 }
 
 .locations-grid {

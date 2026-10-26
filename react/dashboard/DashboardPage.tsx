@@ -4,8 +4,8 @@ import type {
   Location,
   Person,
   TimelineEvent,
-} from "../js/types.ts";
-import { formatDate, getStatusBadgeClass } from "../js/utils.ts";
+} from "../../js/types.ts";
+import { formatDate, getStatusBadgeClass } from "../../js/utils.ts";
 
 export interface DashboardData {
   caseData: CaseData;
