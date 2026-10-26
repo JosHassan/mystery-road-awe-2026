@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { NavLink, useLocation } from "react-router";
 
 type AppShellProps = { children: ReactNode };
@@ -13,6 +13,11 @@ const links = [
 
 export function AppShell({ children }: AppShellProps) {
   const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
     <>
       <header className="app-header">

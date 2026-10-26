@@ -406,6 +406,22 @@ a:focus-visible {
   padding-right: 30px;
 }
 
+.evidence-title-btn {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.evidence-title-btn:hover {
+  color: var(--color-accent-dark);
+  text-decoration: underline;
+}
+
 .evidence-card .evidence-meta {
   font-size: 0.78rem;
   color: var(--color-text-muted);

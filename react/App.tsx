@@ -5,49 +5,27 @@ import {
   fetchEvidenceData,
   fetchTimelineData,
 } from "../js/data.ts";
-import { STORAGE_KEYS } from "../js/state.ts";
 import { DashboardPage, type DashboardData } from "./dashboard/DashboardPage";
 import { AppShell } from "./shell/AppShell";
 import { PeopleLocationsPage } from "./people-locations/PeopleLocationsPage";
 import { PersonDetailPage } from "./people-locations/PersonDetailPage";
 import { TimelinePage } from "./timeline/TimelinePage";
 import { KeyIdentityDemo } from "./demos/KeyIdentityDemo";
-
-const readBookmarkCount = (): number => {
-  try {
-    const value: unknown = JSON.parse(
-      localStorage.getItem(STORAGE_KEYS.bookmarks) ?? "[]",
-    );
-    return Array.isArray(value)
-      ? value.filter((id) => typeof id === "string").length
-      : 0;
-  } catch {
-    return 0;
-  }
-};
-
-function FuturePage({
-  title,
-  originalHash,
-}: {
-  title: string;
-  originalHash: string;
-}) {
-  return (
-    <section>
-      <h2>{title}</h2>
-      <p>
-        This view is still in the original app. It moves to React in Exercise 5.
-      </p>
-      <a href={`/#${originalHash}`}>Open {title} in the original app</a>
-    </section>
-  );
-}
+import { EvidencePage } from "./evidence/EvidencePage";
+import { WorkspacePage } from "./workspace/WorkspacePage";
+import {
+  readBookmarks,
+  readNotes,
+  writeBookmarks,
+  writeNotes,
+} from "./persistence";
 
 export function App() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [bookmarkCount, setBookmarkCount] = useState(readBookmarkCount);
+  const [bookmarks, setBookmarks] = useState<string[]>(readBookmarks);
+  const [notes, setNotes] = useState<Record<string, string>>(readNotes);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -66,14 +44,33 @@ export function App() {
     };
   }, []);
 
-  useEffect(() => {
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === STORAGE_KEYS.bookmarks)
-        setBookmarkCount(readBookmarkCount());
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
+  const toggleBookmark = (evidenceId: string) => {
+    const next = bookmarks.includes(evidenceId)
+      ? bookmarks.filter((id) => id !== evidenceId)
+      : [...bookmarks, evidenceId];
+    try {
+      writeBookmarks(next);
+      setBookmarks(next);
+      setSaveError(null);
+    } catch {
+      setSaveError("Could not save bookmarks in this browser.");
+    }
+  };
+
+  const saveNote = (evidenceId: string, text: string): boolean => {
+    const next = { ...notes };
+    if (text.trim()) next[evidenceId] = text;
+    else delete next[evidenceId];
+    try {
+      writeNotes(next);
+      setNotes(next);
+      setSaveError(null);
+      return true;
+    } catch {
+      setSaveError("Could not save the note in this browser.");
+      return false;
+    }
+  };
 
   const loading = loadError ? (
     <p role="alert">Could not load the case: {loadError}</p>
@@ -83,6 +80,7 @@ export function App() {
 
   return (
     <AppShell>
+      {saveError && <p role="alert">{saveError}</p>}
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route
@@ -91,7 +89,7 @@ export function App() {
             <DashboardPage
               data={data}
               loadError={loadError}
-              bookmarkCount={bookmarkCount}
+              bookmarkCount={bookmarks.length}
             />
           }
         />
@@ -140,11 +138,36 @@ export function App() {
         />
         <Route
           path="/evidence"
-          element={<FuturePage title="Evidence" originalHash="evidence" />}
+          element={
+            data ? (
+              <EvidencePage
+                evidence={data.evidence}
+                people={data.people}
+                locations={data.locations}
+                bookmarks={bookmarks}
+                notes={notes}
+                onToggleBookmark={toggleBookmark}
+                onSaveNote={saveNote}
+              />
+            ) : (
+              loading
+            )
+          }
         />
         <Route
           path="/workspace"
-          element={<FuturePage title="Workspace" originalHash="workspace" />}
+          element={
+            data ? (
+              <WorkspacePage
+                evidence={data.evidence}
+                people={data.people}
+                bookmarks={bookmarks}
+                notes={notes}
+              />
+            ) : (
+              loading
+            )
+          }
         />
         <Route path="/key-demo" element={<KeyIdentityDemo />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
